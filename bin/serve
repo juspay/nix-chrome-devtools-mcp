@@ -25,7 +25,7 @@ for c in \
 done
 
 if [[ -z "$chrome" ]]; then
-    echo "mcp-chrome-devtools: no Chrome binary found under $browsers" >&2
+    echo "nix-chrome-devtools-mcp: no Chrome binary found under $browsers" >&2
     exit 1
 fi
 

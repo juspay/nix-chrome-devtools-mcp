@@ -12,7 +12,7 @@ dependencies:
     - name: chrome-devtools
       registry: false
       transport: stdio
-      # `.agents/skills/<name>/` is APM's converged cross-tool skill deploy
-      # path — every target maps `.apm/skills/<name>/` here.
-      # https://microsoft.github.io/apm/reference/targets-matrix/#skills-convergence
-      command: .agents/skills/nix-chrome-devtools-mcp/bin/serve
+      # `apm_modules/<repo>/` is where APM installs package source. The
+      # consumer's MCP client runs from project root, so this path
+      # resolves directly. https://microsoft.github.io/apm/reference/cli/deps/
+      command: apm_modules/juspay/nix-chrome-devtools-mcp/bin/serve
