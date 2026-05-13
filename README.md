@@ -18,13 +18,19 @@ dependencies:
 
 Nix — see [nixos.asia/en/install](https://nixos.asia/en/install). Flakes must be enabled (`experimental-features = nix-command flakes`).
 
-## Overriding the nixpkgs source
+## Overrides
 
-`bin/serve` reads `$NIXPKGS_FLAKE` (default `nixpkgs`). Override per-consumer:
+The launcher reads two env vars:
 
-- **Per process**: `NIXPKGS_FLAKE=github:NixOS/nixpkgs/<rev>` in the consumer's environment.
-- **System-wide**: `nix registry pin nixpkgs github:NixOS/nixpkgs/<rev>`.
-- **Project-local pin**: declare an overriding `mcp:` entry for `chrome-devtools` in the consumer's root `apm.yml` (root deps win APM's name-first dedupe).
+| Var | Default | Effect |
+|---|---|---|
+| `NIXPKGS_FLAKE` | `nixpkgs` | flake-ref used to resolve `playwright-driver.browsers` and `nodejs`. Examples: `github:NixOS/nixpkgs/<rev>`, `path:/abs/path/to/local/nixpkgs`. |
+| `CHROME_DEVTOOLS_MCP_VERSION` | `latest` | npm dist-tag or version of `chrome-devtools-mcp` to install via `npx -y`. Pin to a specific version (e.g. `0.26.0`) when you need reproducibility. |
+
+System-wide overrides also work:
+
+- `nix registry pin nixpkgs github:NixOS/nixpkgs/<rev>` (replaces the default `nixpkgs` registry alias).
+- Declare an overriding `mcp:` entry for `chrome-devtools` in the consumer's root `apm.yml` (root deps win APM's name-first dedupe).
 
 ## Chrome version compatibility
 
