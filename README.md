@@ -2,6 +2,8 @@
 
 One-click setup for the [Chrome DevTools MCP server](https://github.com/ChromeDevTools/chrome-devtools-mcp) in any Nix-based project. Delivered as an [APM](https://microsoft.github.io/apm/) package: add a single line to your project's [`apm.yml`](https://microsoft.github.io/apm/reference/manifest-schema/) and `apm install` does the rest — Chrome (Playwright's bundled Chrome-for-Testing) and Node.js resolve through Nix; the MCP server gets wired into every supported harness's runtime config (Claude Code, Codex, OpenCode, …). No devshell to author, no flake to compose. The `nixpkgs` source is overridable per process or system-wide.
 
+See [introductory blog post](https://kolu.dev/blog/nix-chrome-devtools-mcp/).
+
 ## Usage
 
 Add to your project's [`apm.yml`](https://microsoft.github.io/apm/reference/manifest-schema/):
