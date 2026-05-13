@@ -2,7 +2,7 @@
 
 A drop-in launcher for the [Chrome DevTools MCP server](https://github.com/ChromeDevTools/chrome-devtools-mcp), packaged for [APM](https://microsoft.github.io/apm/).
 
-`bin/serve` resolves Playwright's bundled Chrome-for-Testing and Node.js directly through Nix. One bash file, one [`apm.yml`](https://microsoft.github.io/apm/reference/manifest-schema/) entry, no devshell required.
+Add one line to your [`apm.yml`](https://microsoft.github.io/apm/reference/manifest-schema/) — `apm install` resolves Playwright's bundled Chrome-for-Testing and Node.js through Nix and wires the MCP server into every harness's runtime config. No devshell, no flake on the consumer's side. The `nixpkgs` source is overridable per process or system-wide.
 
 ## Usage
 
