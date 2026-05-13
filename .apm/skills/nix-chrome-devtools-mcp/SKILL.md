@@ -1,6 +1,6 @@
 ---
 name: nix-chrome-devtools-mcp
-description: chrome-devtools-mcp launcher — a single bash script that resolves Playwright's bundled Chrome-for-Testing and Node.js directly through Nix. See repo README for usage, override mechanisms, version compatibility, and upgrade procedure.
+description: chrome-devtools-mcp launcher — a single bash script that resolves Playwright's bundled Chrome-for-Testing and Node.js directly through Nix. See repo README for usage, override mechanisms, and version compatibility.
 user-invocable: false
 ---
 

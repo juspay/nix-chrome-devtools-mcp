@@ -28,13 +28,7 @@ Nix — see [nixos.asia/en/install](https://nixos.asia/en/install). Flakes must 
 
 ## Chrome version compatibility
 
-`bin/serve` pins `chrome-devtools-mcp` to an explicit version. Each `chrome-devtools-mcp` release transitively pins a Puppeteer release, which expects a specific Chrome-for-Testing milestone. nixpkgs' `playwright-driver.browsers` provides a Chrome that may be a few major versions older than Puppeteer's expectation; CDP is largely backward-compatible, so the core operations (`navigate`, `evaluate`, `take_snapshot`, network/console inspection, screenshots) work, but Lighthouse-driven tooling (`performance_*` insights) is the most version-sensitive piece. If a `chrome-devtools-mcp` upgrade breaks against your nixpkgs Chrome, bump both ends together — pick a Playwright-driver revision whose Chrome milestone matches Puppeteer's expected version.
-
-## Upgrading
-
-1. `curl -s https://registry.npmjs.org/chrome-devtools-mcp/latest | jq -r .version` to see the current release.
-2. Update the pinned version in `bin/serve`.
-3. Test against your project's Chrome.
+`chrome-devtools-mcp` is always pulled at `@latest` via `npx`. Each release transitively pins a Puppeteer version that expects a specific Chrome-for-Testing milestone; nixpkgs' `playwright-driver.browsers` provides a Chrome that may run a few major versions behind. CDP is largely backward-compatible, so the core operations (`navigate`, `evaluate`, `take_snapshot`, network/console inspection, screenshots) work, but Lighthouse-driven tooling (`performance_*` insights) is the most version-sensitive piece. If a `chrome-devtools-mcp` release breaks against your nixpkgs Chrome, override `NIXPKGS_FLAKE` to a newer nixpkgs revision whose Playwright Chrome matches Puppeteer's expected milestone.
 
 ## License
 
