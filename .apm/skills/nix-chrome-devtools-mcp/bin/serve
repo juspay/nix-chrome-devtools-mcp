@@ -25,8 +25,10 @@ mcp_version="${CHROME_DEVTOOLS_MCP_VERSION:-latest}"
 browsers="${CHROME_DEVTOOLS_MCP_BROWSERS:-$(nix build --no-link --print-out-paths "${nixpkgs}#playwright-driver.browsers")}"
 
 chrome=""
+# chrome-linux* matches both spellings nixpkgs/playwright have shipped:
+# chrome-linux64 (e.g. playwright-driver 1.60.0) and chrome-linux (1.56.1).
 for c in \
-    "$browsers"/chromium-*/chrome-linux64/chrome \
+    "$browsers"/chromium-*/chrome-linux*/chrome \
     "$browsers"/chromium-*/chrome-mac-*/"Google Chrome for Testing.app"/Contents/MacOS/"Google Chrome for Testing"; do
     if [[ -x "$c" ]]; then
         chrome="$c"
