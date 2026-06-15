@@ -7,6 +7,14 @@
 #   NIXPKGS_FLAKE                 — flake-ref for nixpkgs (default: `nixpkgs`)
 #   CHROME_DEVTOOLS_MCP_VERSION   — npm version of chrome-devtools-mcp
 #                                   (default: `latest`)
+#   CHROME_DEVTOOLS_MCP_BROWSERS  — path to an existing Playwright browser
+#                                   bundle; skips the nix build (offline use,
+#                                   and CI fixtures that exercise the resolver).
+#
+# Flags:
+#   --check   resolve the Chrome binary, print its path, and exit (0 on
+#             success, 1 if none found) — without launching the MCP server.
+#             Used by CI; also handy for "which Chrome will this use?".
 
 set -euo pipefail
 shopt -s nullglob
@@ -14,11 +22,13 @@ shopt -s nullglob
 nixpkgs="${NIXPKGS_FLAKE:-nixpkgs}"
 mcp_version="${CHROME_DEVTOOLS_MCP_VERSION:-latest}"
 
-browsers=$(nix build --no-link --print-out-paths "${nixpkgs}#playwright-driver.browsers")
+browsers="${CHROME_DEVTOOLS_MCP_BROWSERS:-$(nix build --no-link --print-out-paths "${nixpkgs}#playwright-driver.browsers")}"
 
 chrome=""
+# chrome-linux* matches both spellings nixpkgs/playwright have shipped:
+# chrome-linux64 (e.g. playwright-driver 1.60.0) and chrome-linux (1.56.1).
 for c in \
-    "$browsers"/chromium-*/chrome-linux64/chrome \
+    "$browsers"/chromium-*/chrome-linux*/chrome \
     "$browsers"/chromium-*/chrome-mac-*/"Google Chrome for Testing.app"/Contents/MacOS/"Google Chrome for Testing"; do
     if [[ -x "$c" ]]; then
         chrome="$c"
@@ -29,6 +39,14 @@ done
 if [[ -z "$chrome" ]]; then
     echo "nix-chrome-devtools-mcp: no Chrome binary found under $browsers" >&2
     exit 1
+fi
+
+# --check: report the resolved Chrome path and exit, without starting the MCP
+# server. Lets CI assert detection works (issue #3) and gives users a quick
+# "which Chrome will this use?".
+if [[ "${1:-}" == "--check" ]]; then
+    echo "$chrome"
+    exit 0
 fi
 
 # ffmpeg is on PATH so chrome-devtools-mcp's experimental screencast tools

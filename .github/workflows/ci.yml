@@ -1,0 +1,95 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  # Deterministic regression test for issue #3. The Playwright browser bundle's
+  # Chrome directory name is NOT stable across versions:
+  #   playwright-driver 1.56.1 -> chromium-1194/chrome-linux/chrome   (no `64`)
+  #   playwright-driver 1.60.0 -> chromium-1223/chrome-linux64/chrome
+  # so a resolver hard-coded to one spelling silently breaks on the other.
+  # We drive the REAL resolver (bin/serve --check) against fixture bundles for
+  # every known layout via CHROME_DEVTOOLS_MCP_BROWSERS — no nix build, no
+  # network, no version drift. The buggy `chrome-linux64`-only glob fails the
+  # `chrome-linux` case below (reproducing #3); the `chrome-linux*` fix passes.
+  glob-resolution:
+    name: bin/serve resolves Chrome across bundle layouts (issue #3)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve Chrome for every known bundle layout
+        run: |
+          set -uo pipefail
+          serve=.apm/skills/nix-chrome-devtools-mcp/bin/serve
+
+          # Build a fixture bundle whose Chrome lives at $1, mark it executable,
+          # and assert `bin/serve --check` resolves exactly that path.
+          assert_resolves() {
+            local label=$1 rel=$2
+            local root chrome
+            root=$(mktemp -d)
+            chrome="$root/$rel"
+            mkdir -p "$(dirname "$chrome")"
+            : > "$chrome"; chmod +x "$chrome"
+            local got
+            if ! got=$(CHROME_DEVTOOLS_MCP_BROWSERS="$root" "$serve" --check); then
+              echo "::error::[$label] bin/serve could not resolve Chrome at $rel — issue #3 reproduced"
+              return 1
+            fi
+            if [[ "$got" != "$chrome" ]]; then
+              echo "::error::[$label] resolved '$got', expected '$chrome'"
+              return 1
+            fi
+            echo "OK [$label]: resolved $rel"
+          }
+
+          rc=0
+          assert_resolves "linux (1.56.x)"  "chromium-1194/chrome-linux/chrome"   || rc=1
+          assert_resolves "linux (1.60.x)"  "chromium-1223/chrome-linux64/chrome" || rc=1
+          assert_resolves "macOS"           "chromium-1194/chrome-mac-x64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing" || rc=1
+
+          # Negative: an empty bundle must fail with the documented error.
+          empty=$(mktemp -d)
+          err=$(mktemp)
+          if CHROME_DEVTOOLS_MCP_BROWSERS="$empty" "$serve" --check >/dev/null 2>"$err"; then
+            echo "::error::[empty] expected failure, but resolution succeeded"; rc=1
+          elif ! grep -q "no Chrome binary found" "$err"; then
+            echo "::error::[empty] missing the documented 'no Chrome binary found' error"; rc=1
+          else
+            echo "OK [empty]: failed with the documented error"
+          fi
+
+          exit $rc
+
+  # Integration smoke test: drive the resolver against whatever Chrome the
+  # current nixpkgs actually ships, end to end (real nix build).
+  live-nixpkgs:
+    name: bin/serve resolves Chrome from live nixpkgs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - name: Resolve Chrome from nixpkgs#playwright-driver.browsers
+        env:
+          NIXPKGS_FLAKE: github:NixOS/nixpkgs/nixpkgs-unstable
+        run: |
+          set -uo pipefail
+          serve=.apm/skills/nix-chrome-devtools-mcp/bin/serve
+          echo "playwright-driver: $(nix eval --raw "$NIXPKGS_FLAKE#playwright-driver.version")"
+          if ! chrome=$("$serve" --check); then
+            echo "::error::bin/serve could not resolve Chrome from live nixpkgs"
+            exit 1
+          fi
+          echo "Resolved Chrome: $chrome"
+          [[ -x "$chrome" ]] || { echo "::error::not executable: $chrome"; exit 1; }
+          echo "OK: Chrome resolved and executable"
