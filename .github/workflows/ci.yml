@@ -24,7 +24,7 @@ jobs:
       - name: Resolve Chrome for every known bundle layout
         run: |
           set -uo pipefail
-          serve=.apm/skills/nix-chrome-devtools-mcp/bin/serve
+          serve=skills/nix-chrome-devtools-mcp/bin/serve
 
           # Build a fixture bundle whose Chrome lives at $1, mark it executable,
           # and assert `bin/serve --check` resolves exactly that path.
@@ -84,7 +84,7 @@ jobs:
           NIXPKGS_FLAKE: github:NixOS/nixpkgs/nixpkgs-unstable
         run: |
           set -uo pipefail
-          serve=.apm/skills/nix-chrome-devtools-mcp/bin/serve
+          serve=skills/nix-chrome-devtools-mcp/bin/serve
           echo "playwright-driver: $(nix eval --raw "$NIXPKGS_FLAKE#playwright-driver.version")"
           if ! chrome=$("$serve" --check); then
             echo "::error::bin/serve could not resolve Chrome from live nixpkgs"

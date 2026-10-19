@@ -16,6 +16,18 @@ dependencies:
 
 `apm install` aggregates the MCP entry from this package's `apm.yml` into your runtime configs (`.mcp.json`, `.codex/config.toml`, `opencode.json`).
 
+## Use as an Agent Plugin
+
+The repository root is also an [Agent Plugin](https://agent-plugins.org/specification) (v1.0.0), so any Agent Plugins client can reference it directly:
+
+```sh
+AI_PROFILE=github:juspay/nix-chrome-devtools-mcp agent-distro omp
+```
+
+Clients that read the plugin get both components: the `nix-chrome-devtools-mcp` skill (`skills/`) and the `chrome-devtools` MCP server (`mcp.json`), whose command is the plugin-relative `./skills/nix-chrome-devtools-mcp/bin/serve`.
+
+Existing [APM](https://microsoft.github.io/apm/) consumers keep working through `apm.yml`; `.apm/skills/nix-chrome-devtools-mcp` is a symlink to the same skill directory, so there is one copy.
+
 ## Requirements
 
 Nix — see [nixos.asia/en/install](https://nixos.asia/en/install). Flakes must be enabled (`experimental-features = nix-command flakes`).
