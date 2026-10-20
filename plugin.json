@@ -1,0 +1,8 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "nix-chrome-devtools-mcp",
+  "version": "0.1.0",
+  "description": "chrome-devtools-mcp launcher — a single bash launcher that resolves Playwright's bundled Chrome-for-Testing and Node.js directly through Nix. No devshell required.",
+  "repository": "https://github.com/juspay/nix-chrome-devtools-mcp",
+  "license": "Apache-2.0"
+}
