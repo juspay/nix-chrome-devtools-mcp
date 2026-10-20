@@ -9,4 +9,4 @@ Drop-in launcher for the [Chrome DevTools MCP server](https://github.com/ChromeD
 
 Full docs in the [repo README](https://github.com/juspay/nix-chrome-devtools-mcp/blob/main/README.md).
 
-This skill primitive exists for APM's deployment convention — it ensures `bin/serve` lands at `.agents/skills/nix-chrome-devtools-mcp/bin/serve` in the consumer's working tree (per APM's [skills convergence](https://microsoft.github.io/apm/reference/targets-matrix/#skills-convergence) path), which keeps the launcher available even before `apm install` runs on a fresh clone. The same directory is the skill of this repository's Agent Plugin, where `mcp.json` launches `./skills/nix-chrome-devtools-mcp/bin/serve` directly. The package is mechanically a "skill" in APM's primitive vocabulary; semantically it's a tool.
+This directory is the skill of the repository's Agent Plugin. It documents the launcher for agents; `mcp.json` launches `./skills/nix-chrome-devtools-mcp/bin/serve`, so the skill and the MCP server come from the same plugin.

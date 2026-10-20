@@ -1,24 +1,12 @@
 # nix-chrome-devtools-mcp
 
-One-click setup for the [Chrome DevTools MCP server](https://github.com/ChromeDevTools/chrome-devtools-mcp) in any Nix-based project. Delivered as an [APM](https://microsoft.github.io/apm/) package: add a single line to your project's [`apm.yml`](https://microsoft.github.io/apm/reference/manifest-schema/) and `apm install` does the rest — Chrome (Playwright's bundled Chrome-for-Testing) and Node.js resolve through Nix; the MCP server gets wired into every supported harness's runtime config (Claude Code, Codex, OpenCode, …). No devshell to author, no flake to compose. The `nixpkgs` source is overridable per process or system-wide.
+One-click setup for the [Chrome DevTools MCP server](https://github.com/ChromeDevTools/chrome-devtools-mcp) in any Nix-based project. Delivered as an [Agent Plugin](https://agent-plugins.org/specification) (v1.0.0): reference `github:juspay/nix-chrome-devtools-mcp` from an agent-distro profile and clients get the `chrome-devtools` MCP server, with Chrome (Playwright's bundled Chrome-for-Testing) and Node.js resolving through Nix. No devshell to author, no flake to compose. The `nixpkgs` source is overridable per process or system-wide.
 
 See [introductory blog post](https://kolu.dev/blog/nix-chrome-devtools-mcp/).
 
-## Usage
-
-Add to your project's [`apm.yml`](https://microsoft.github.io/apm/reference/manifest-schema/):
-
-```yaml
-dependencies:
-  apm:
-    - juspay/nix-chrome-devtools-mcp
-```
-
-`apm install` aggregates the MCP entry from this package's `apm.yml` into your runtime configs (`.mcp.json`, `.codex/config.toml`, `opencode.json`).
-
 ## Use as an Agent Plugin
 
-The repository root is also an [Agent Plugin](https://agent-plugins.org/specification) (v1.0.0), so any Agent Plugins client can reference it directly:
+The repository root is an [Agent Plugin](https://agent-plugins.org/specification) (v1.0.0), so any Agent Plugins client can reference it directly:
 
 ```sh
 AI_PROFILE=github:juspay/nix-chrome-devtools-mcp agent-distro omp
@@ -26,7 +14,31 @@ AI_PROFILE=github:juspay/nix-chrome-devtools-mcp agent-distro omp
 
 Clients that read the plugin get both components: the `nix-chrome-devtools-mcp` skill (`skills/`) and the `chrome-devtools` MCP server (`mcp.json`), whose command is the plugin-relative `./skills/nix-chrome-devtools-mcp/bin/serve`.
 
-Existing [APM](https://microsoft.github.io/apm/) consumers keep working through `apm.yml`; `.apm/skills/nix-chrome-devtools-mcp` is a symlink to the same skill directory, so there is one copy.
+## Migrating from APM
+
+APM support is removed. Move the dependency into your profile's `plugin.json`:
+
+```yaml
+# before — apm.yml
+dependencies:
+  apm:
+    - juspay/nix-chrome-devtools-mcp
+```
+
+```json
+// after — plugin.json
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "my-profile",
+  "extensions": {
+    "asia.nixos.agent-distro": {
+      "plugins": ["github:juspay/nix-chrome-devtools-mcp"]
+    }
+  }
+}
+```
+
+`apm install` becomes nothing to run: agent-distro reads the plugin at launch, and the `chrome-devtools` server comes with it. See [Profiles](https://agent-distro.nixos.asia/#profiles).
 
 ## Requirements
 
@@ -44,7 +56,6 @@ The launcher reads two env vars:
 System-wide overrides also work:
 
 - `nix registry pin nixpkgs github:NixOS/nixpkgs/<rev>` (replaces the default `nixpkgs` registry alias).
-- Declare an overriding `mcp:` entry for `chrome-devtools` in the consumer's root `apm.yml` (root deps win APM's name-first dedupe).
 
 ## Screencast (video) recording
 
